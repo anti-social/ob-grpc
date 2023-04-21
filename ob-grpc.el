@@ -40,7 +40,7 @@
 
 (defun ob-grpc--concat-flags (flag values)
   "Take a flag and a list of values and return string of grpcurl cli arguments."
-  (mapconcat (lambda (v) (concat flag " " v)) values " "))
+  (mapconcat (lambda (v) (concat flag " " (prin1-to-string v))) values " "))
 
 
 (defun ob-grpc--grpcurl-list (proto-file import-paths &optional service)
