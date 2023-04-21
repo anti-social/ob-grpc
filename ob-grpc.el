@@ -38,20 +38,22 @@
   (delete "" (split-string string "\n")))
 
 
-(defun ob-grpc--concat-imports (import-paths)
-  "Take a list of IMPORT-PATHS and return string of grpcurl cli arguments."
+(defun ob-grpc--concat-flags (flag values)
+  "Take a flag and a list of values and return string of grpcurl cli arguments."
   (let (result)
     (dolist (item import-paths result)
-      (setq result (concat " -import-path " item result)))
+      (setq result (format " %s %s %s " flag (prin1-to-string item) result)))
     result))
+
+
+(defun ob-grpc--concat-imports (import-paths)
+  "Take a list of IMPORT-PATHS and return string of grpcurl cli arguments."
+  (ob-grpc--concat-flags "-import-path" import-paths))
 
 
 (defun ob-grpc--concat-headers (headers)
   "Take a list of headers and return string of grpcurl cli arguments."
-  (let (result)
-    (dolist (item headers result)
-      (setq result (concat " -H " item result)))
-    result))
+  (ob-grpc--concat-flags "-H" headers))
 
 
 (defun ob-grpc--grpcurl-list (proto-file import-paths &optional service)
@@ -166,12 +168,12 @@ in PROTO-FILE and IMPORT-PATHS.  Else return methods under SERVICE."
     (shell-command-to-string
      (message "grpcurl %s -proto %s %s %s -d %s \"%s\" \"%s\""
 	      (ob-grpc--concat-imports import-paths)
-	      proto-file
+	      (prin1-to-string proto-file)
 	      (if (equal plain-text "no") "" "-plaintext")
 	      (if (not headers) "" (ob-grpc--concat-headers headers))
 	      (prin1-to-string body)
-	      grpc-endpoint
-	      method
+	      (prin1-to-string grpc-endpoint)
+	      (prin1-to-string method)
 	      ))))
 
 ;;;###autoload
