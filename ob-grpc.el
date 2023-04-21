@@ -168,7 +168,7 @@ in PROTO-FILE and IMPORT-PATHS.  Else return methods under SERVICE."
 	      (ob-grpc--concat-imports import-paths)
 	      proto-file
 	      (if (equal plain-text "no") "" "-plaintext")
-	      (if (headers) (ob-grpc--concat-headers headers) "")
+	      (if (not headers) (ob-grpc--concat-headers headers) "")
 	      (prin1-to-string body)
 	      grpc-endpoint
 	      method
