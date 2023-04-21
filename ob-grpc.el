@@ -43,16 +43,6 @@
   (mapconcat (lambda (v) (concat flag " " v)) values " "))
 
 
-(defun ob-grpc--concat-imports (import-paths)
-  "Take a list of IMPORT-PATHS and return string of grpcurl cli arguments."
-  (ob-grpc--concat-flags "-import-path" import-paths))
-
-
-(defun ob-grpc--concat-headers (headers)
-  "Take a list of headers and return string of grpcurl cli arguments."
-  (ob-grpc--concat-flags "-H" headers))
-
-
 (defun ob-grpc--grpcurl-list (proto-file import-paths &optional service)
   "When no SERVICE is provided, return a list of grpc services defined \
 in PROTO-FILE and IMPORT-PATHS.  Else return methods under SERVICE."
@@ -163,11 +153,11 @@ in PROTO-FILE and IMPORT-PATHS.  Else return methods under SERVICE."
          (method (alist-get :method params))
 	 (headers (alist-get :headers params)))
     (shell-command-to-string
-     (message "grpcurl %s -proto %s %s %s -d %s \"%s\" \"%s\""
-	      (ob-grpc--concat-imports import-paths)
+     (message "grpcurl %s -proto %s %s %s -d %s %s %s"
+	      (ob-grpc--concat-flags "-import-path" import-paths)
 	      (prin1-to-string proto-file)
 	      (if (equal plain-text "no") "" "-plaintext")
-	      (if (not headers) "" (ob-grpc--concat-headers headers))
+	      (if (not headers) "" (ob-grpc--concat-flags "-H" headers))
 	      (prin1-to-string body)
 	      (prin1-to-string grpc-endpoint)
 	      (prin1-to-string method)
