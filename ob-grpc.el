@@ -46,6 +46,14 @@
     result))
 
 
+(defun ob-grpc--concat-headers (headers)
+  "Take a list of headers and return string of grpcurl cli arguments."
+  (let (result)
+    (dolist (item headers result)
+      (setq result (concat " -H " item result)))
+    result))
+
+
 (defun ob-grpc--grpcurl-list (proto-file import-paths &optional service)
   "When no SERVICE is provided, return a list of grpc services defined \
 in PROTO-FILE and IMPORT-PATHS.  Else return methods under SERVICE."
@@ -153,12 +161,14 @@ in PROTO-FILE and IMPORT-PATHS.  Else return methods under SERVICE."
 	 (import-paths (split-string (org-entry-get nil "PROTO-IMPORT-PATH" t) " "))
 	 (grpc-endpoint (org-entry-get nil "GRPC-ENDPOINT" t))
 	 (plain-text (org-entry-get nil "PLAIN-TEXT" t))
-         (method (alist-get :method params)))
+         (method (alist-get :method params))
+	 (headers (alist-get :headers params)))
     (shell-command-to-string
-     (message "grpcurl %s -proto %s %s -d %s \"%s\" \"%s\""
+     (message "grpcurl %s -proto %s %s %s -d %s \"%s\" \"%s\""
 	      (ob-grpc--concat-imports import-paths)
 	      proto-file
 	      (if (equal plain-text "no") "" "-plaintext")
+	      (if (headers) (ob-grpc--concat-headers headers) "")
 	      (prin1-to-string body)
 	      grpc-endpoint
 	      method
